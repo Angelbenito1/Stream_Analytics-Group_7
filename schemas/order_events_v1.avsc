@@ -1,0 +1,65 @@
+{
+  "type": "record",
+  "name": "OrderEvent",
+  "namespace": "com.fooddelivery.streaming",
+  "doc": "Represents a lifecycle event of a food delivery order",
+  "fields": [
+    {"name": "event_id", "type": "string", "doc": "Unique event identifier for deduplication"},
+    {"name": "order_id", "type": "string", "doc": "Unique order identifier"},
+    
+    {
+      "name": "event_type",
+      "type": {
+        "type": "enum",
+        "name": "OrderEventType",
+        "symbols": [
+          "created",
+          "accepted",
+          "prep_started",
+          "ready_for_pickup",
+          "picked_up",
+          "delivered",
+          "cancelled"
+        ]
+      }
+    },
+
+    {
+      "name": "event_ts",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Event time in milliseconds"
+    },
+
+    {
+      "name": "ingest_ts",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Processing/ingestion time"
+    },
+
+    {"name": "restaurant_id", "type": "string"},
+    {"name": "zone_id", "type": "string"},
+
+    {
+      "name": "courier_id",
+      "type": ["null", "string"],
+      "default": null
+    },
+
+    {"name": "order_value", "type": "double"},
+    {"name": "is_promo", "type": "boolean"},
+    {"name": "estimated_delivery_minutes", "type": "int"},
+
+    {
+      "name": "version",
+      "type": "int",
+      "default": 1,
+      "doc": "Schema version for evolution handling"
+    }
+  ]
+}
