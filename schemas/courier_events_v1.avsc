@@ -1,0 +1,65 @@
+{
+  "type": "record",
+  "name": "CourierEvent",
+  "namespace": "com.fooddelivery.streaming",
+  "doc": "Represents status updates and activity signals from couriers",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "courier_id", "type": "string"},
+    {
+      "name": "event_type",
+      "type": {
+        "type": "enum",
+        "name": "CourierEventType",
+        "symbols": [
+          "status_change",
+          "location_update",
+          "assignment",
+          "unassignment"
+        ]
+      }
+    },
+    {
+      "name": "courier_status",
+      "type": {
+        "type": "enum",
+        "name": "CourierStatus",
+        "symbols": [
+          "offline",
+          "idle",
+          "moving_to_pickup",
+          "waiting_at_restaurant",
+          "delivering",
+          "paused"
+        ]
+      }
+    },
+    {
+      "name": "event_ts",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "ingest_ts",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {"name": "zone_id", "type": "string"},
+    {
+      "name": "order_id",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {"name": "latitude", "type": "double"},
+    {"name": "longitude", "type": "double"},
+    {
+      "name": "version",
+      "type": "int",
+      "default": 1
+    }
+  ]
+}
