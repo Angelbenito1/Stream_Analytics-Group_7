@@ -6,7 +6,12 @@ import random
 from datetime import datetime, timedelta
 
 import numpy as np
-
+from generator.edge_cases import (
+    inject_duplicates,
+    inject_out_of_order,
+    inject_missing_steps,
+    inject_impossible_durations,
+)
 from generator.config import load_config
 from generator.distributions import demand_multiplier, promo_probability
 from generator.reference_data import generate_restaurants, generate_couriers
@@ -116,6 +121,13 @@ def main():
     _ensure_dirs(out_json_dir, out_avro_dir)
 
     events = generate_orders_stream(cfg)
+
+    ec = cfg.get("edge_cases", {}).get("orders", {})
+
+    events = inject_duplicates(events, float(ec.get("duplicate_ratio", 0.0)))
+    events = inject_missing_steps(events, float(ec.get("missing_step_prob", 0.0)))
+    events = inject_impossible_durations(events, float(ec.get("impossible_duration_prob", 0.0)))
+    events = inject_out_of_order(events, int(ec.get("max_delay_ms", 0)))
 
     if cfg["output"]["write_json"] and not args.no_json:
         write_jsonl(events, os.path.join(out_json_dir, "order_events.jsonl"))
