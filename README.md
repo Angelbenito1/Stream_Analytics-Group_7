@@ -128,3 +128,16 @@ The project includes:
 - Sample JSON and AVRO batches  
 
 All components are integrated and validated.
+
+## Milestone 2
+## Orders → Azure Event Hubs
+
+Event Hub name: `group_7_orders`  
+Partitions: `4`  
+Message key: `order_id`  
+Encoding: `AVRO`
+
+### Run
+```bash
+python -m generator.run_generator --duration-min 2 --orders-per-min 4
+python producers/orders_eventhub_producer.py
