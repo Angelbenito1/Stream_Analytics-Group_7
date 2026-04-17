@@ -12,7 +12,7 @@ from pathlib import Path
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
-EVENT_HUB_NAMESPACE = os.getenv("EVENT_HUB_NAME")
+EVENT_HUB_NAMESPACE = os.getenv("EVENT_HUB_NAMESPACE")
 EVENT_HUB_CONNECTION_STRING = os.getenv("EVENT_HUB_DELIVERY_CONNECTION_STRING")
 EVENT_HUB_COURIERS_NAME = os.getenv("EVENT_HUB_COURIERS_NAME", "group_7_delivery")
 
