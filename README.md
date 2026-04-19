@@ -1,130 +1,150 @@
-# Stream_Analytics-Group_7
+# UrbanEats — Real-Time Food Delivery Analytics
 
-Real-time food delivery streaming simulation project.
-
-This project simulates a real-time food delivery marketplace (orders, couriers, lifecycle events) and implements:
-
-- Synthetic streaming event generation
-- AVRO schemas and serialization
-- Configurable realism knobs (peaks, weekend effects, surge, promo periods)
-- Edge-case injection for streaming correctness testing
-- Streaming validation and QA tools
+Group 7 · Spring 2026
 
 ---
 
-## Project Structure
+## Project Overview
 
-generator/            → Event generators, CLI framework, edge cases, validation  
-schemas/              → AVRO schemas  
-data/sample_json/     → Generated JSON sample batches  
-data/sample_avro/     → Generated AVRO sample batches  
-docs/                 → Documentation (AVRO versioning, design notes)  
-requirements.txt      → Python dependencies  
-README.md             → Project documentation  
+This project implements a real-time data pipeline for food delivery analytics.
 
----
+It processes two main data streams:
+- Orders (customer demand)
+- Delivery (courier activity)
 
-## Setup (from scratch)
-
-Clone the repository and create a virtual environment:
-
-python -m venv venv  
-source venv/bin/activate  
-pip install -r requirements.txt  
-
-Python 3.10+ recommended.
+The goal is to simulate a real system and generate useful business insights.
 
 ---
 
-## Generate Sample Data
+## Architecture
 
-Run the generator with configurable parameters:
+Data Generator → Event Hubs → Spark → Bronze → Silver → Gold → Dashboard
 
-python -m generator.run_generator --duration-min 5 --orders-per-min 6  
+### Components
 
-This generates:
+1. **Data Generator (Python)**  
+   Creates synthetic order and courier data.
 
-- data/sample_json/order_events.jsonl  
-- data/sample_json/courier_events.jsonl  
-- data/sample_avro/order_events.avro  
-- data/sample_avro/courier_events.avro  
+2. **Azure Event Hubs**  
+   Receives streaming data.  
+   Topics:
+   - `group_7_orders`
+   - `group_7_delivery`
 
----
+3. **Spark Structured Streaming**  
+   Reads data from Event Hubs and processes it.
 
-## Realism Features
+4. **Azure Blob Storage**  
+   Stores processed data (Gold layer).
 
-The generator includes:
-
-- Lunch demand peak  
-- Dinner demand peak  
-- Weekend demand multiplier  
-- Zone-level demand skew  
-- Surge demand periods  
-- Promotional periods  
-- Poisson arrival process  
-- Configurable edge-case probabilities  
-
-All parameters are configurable through the configuration file.
+5. **Streamlit Dashboard**  
+   Displays KPIs and analytics.
 
 ---
 
-## Streaming Correctness & QA
+## Data Layers
 
-Edge-case injection supports:
+### Bronze
+- Raw ingested data
+- Stored as Parquet
+- Minimal processing
 
-- Duplicate events ratio  
-- Out-of-order ingestion delay  
-- Missing lifecycle steps  
-- Impossible durations (negative or unrealistic timestamps)  
+### Silver
+- Cleaned data
+- Valid schema
+- Filtered records
 
-To validate generated samples:
+### Gold
 
-python generator/validate_samples.py  
+#### Orders KPIs (5-minute windows)
+- orders_total
+- unique_orders
+- delivered_orders
+- cancelled_orders
+- avg_order_value
+- total_revenue
+- cancel_rate
 
-Expected output:
+#### Demand vs Supply
+- waiting_orders
+- available_couriers
+- demand_supply_ratio
 
-VALIDATION OK ✅  
+#### Delivery Anomalies
+- avg_delivery_minutes
+- p95_delivery_minutes
+- anomaly_flag
 
-The validator checks:
+#### System KPIs
+- order_events
+- delivery_events
+- total_events
+- active_zones
 
-- Required fields presence  
-- Enum validity  
-- Timestamp sanity (event_ts / ingest_ts)  
-- Join ID consistency (order_id, courier_id, zone_id)  
+#### Business KPIs (global)
+- unique_orders
+- delivered_orders
+- cancelled_orders
+- total_revenue
+- cancel_rate
 
 ---
 
-## AVRO Support
+## Dashboard
 
-- Schemas stored in schemas/  
-- AVRO utilities implemented in generator/avro_utils.py  
-- Versioning guidelines documented in docs/avro_versioning.md  
+The dashboard shows:
 
-Sample AVRO batches are generated automatically with the CLI.
+### Business KPIs
+- Unique Orders
+- Delivered Orders
+- Total Revenue
+- Cancellation Rate
+
+### System KPIs
+- Order Events
+- Delivery Events
+- Total Events
+- Active Zones
+
+### Visualizations
+- Orders over time
+- Demand vs supply
+- Delivery anomalies
 
 ---
 
-## Authors & Responsibilities
+## Key Concepts
 
-Feed A (Orders): Angel Benito 
-Feed B (Couriers): Juan Muñoz
-AVRO & Versioning: Bruno Sanchis
-Generator Framework & Realism: Francisco Javier Roca 
-Streaming Correctness & QA: Yago Moreno
-Integration & Documentation: Andrés Ramírez
+- Event data is not the same as business data  
+  (one order generates multiple events)
+- Unique orders represent real activity
+- Gold layer is used for reporting
+- Dashboard reads Gold data for stability
+
 
 ---
 
-## Milestone 1 Completion
+## Use Cases
 
-The project includes:
+### Basic
+- KPI aggregation
 
-- Two streaming feeds  
-- AVRO schemas and serialization  
-- Configurable generator framework  
-- Realistic event simulation  
-- Edge-case injection  
-- Validation tools  
-- Sample JSON and AVRO batches  
+### Intermediate
+- Demand vs supply
 
-All components are integrated and validated.
+### Advanced
+- Delivery anomaly detection
+
+---
+
+## Notes
+
+- The dashboard uses event-time data
+- Data is synthetic but realistic
+- The pipeline is fully functional end-to-end
+
+---
+
+## Team
+
+Group 7 · Spring 2026

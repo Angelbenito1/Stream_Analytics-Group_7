@@ -8,8 +8,8 @@ import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(
-    page_title="Urban Flow Monitor",
-    page_icon="📊",
+    page_title="UrbanEats",
+    page_icon="🍗",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -25,6 +25,7 @@ orders_path = gold_root / "orders_kpi_5m"
 demand_supply_path = gold_root / "demand_supply_zone"
 anomalies_path = gold_root / "delivery_anomalies"
 system_kpis_path = gold_root / "system_kpis"
+business_kpis_path = gold_root / "business_kpis"
 
 # -------------------------
 # Styles
@@ -251,18 +252,21 @@ def load_data():
         raise FileNotFoundError(f"Missing anomalies gold data: {anomalies_path}")
     if not system_kpis_path.exists():
         raise FileNotFoundError(f"Missing system_kpis gold data: {system_kpis_path}")
+    if not business_kpis_path.exists():
+        raise FileNotFoundError(f"Missing business_kpis gold data: {business_kpis_path}")
 
     orders = pd.read_parquet(orders_path)
     demand_supply = pd.read_parquet(demand_supply_path)
     anomalies = pd.read_parquet(anomalies_path)
     system_kpis = pd.read_parquet(system_kpis_path)
+    business_kpis = pd.read_parquet(business_kpis_path)
 
     if "window_start" in orders.columns:
         orders["window_start"] = pd.to_datetime(orders["window_start"])
     if "window_end" in orders.columns:
         orders["window_end"] = pd.to_datetime(orders["window_end"])
 
-    return orders, demand_supply, anomalies, system_kpis
+    return orders, demand_supply, anomalies, system_kpis, business_kpis
 
 
 def safe_sum(df, col):
@@ -312,7 +316,7 @@ def mini_kpi(title, value):
 # -------------------------
 # Sidebar
 # -------------------------
-st.sidebar.markdown("## 📊 Urban Flow Monitor")
+st.sidebar.markdown("## 🍗 UrbanEats Monitor")
 st.sidebar.caption("Group 7 · Spring 2026")
 st.sidebar.caption("Synthetic food delivery observability")
 
@@ -347,7 +351,7 @@ st.sidebar.markdown("### Filters")
 # Load data
 # -------------------------
 try:
-    orders_df, demand_supply_df, anomalies_df, system_kpis_df = load_data()
+    orders_df, demand_supply_df, anomalies_df, system_kpis_df, business_kpis_df = load_data()
 except Exception as e:
     st.error(f"Dashboard data could not be loaded: {e}")
     st.stop()
@@ -374,15 +378,18 @@ else:
 # -------------------------
 # KPI calculations
 # -------------------------
-unique_orders = int(safe_sum(orders_view, "unique_orders"))
-delivered_orders = int(safe_sum(orders_view, "delivered_orders"))
-total_revenue = safe_sum(orders_view, "total_revenue")
-cancel_rate = safe_mean(orders_view, "cancel_rate") * 100
+# business_kpis are GLOBAL and should not be summed from window buckets
+unique_orders = int(safe_first(business_kpis_df, "unique_orders"))
+delivered_orders = int(safe_first(business_kpis_df, "delivered_orders"))
+cancelled_orders = int(safe_first(business_kpis_df, "cancelled_orders"))
+total_revenue = float(safe_first(business_kpis_df, "total_revenue"))
+cancel_rate = float(safe_first(business_kpis_df, "cancel_rate")) * 100
 
-cancelled_orders = int(safe_sum(orders_view, "cancelled_orders"))
+# average order value can still be shown from the bucketed view
 avg_order_value = safe_mean(orders_view, "avg_order_value")
 zones_selected = len(selected_zones) if selected_zones else len(zones)
 
+# system KPIs
 order_events = int(safe_first(system_kpis_df, "order_events"))
 delivery_events = int(safe_first(system_kpis_df, "delivery_events"))
 total_events = int(safe_first(system_kpis_df, "total_events"))
@@ -398,9 +405,9 @@ st.markdown(
     <div class="top-banner">
         <div class="tiny">Last sync {last_sync}</div>
         <div style="display:flex; align-items:center; gap:14px;">
-            <div style="font-size:2rem;">📈</div>
+            <div style="font-size:2rem;">🍗</div>
             <div>
-                <div class="headline">Urban Flow Monitor</div>
+                <div class="headline">UrbanEats Monitor</div>
                 <div class="subhead">Operational intelligence for synthetic food delivery streams</div>
             </div>
         </div>
@@ -418,11 +425,11 @@ if page == "Overview":
     with c1:
         kpi_card("Unique Orders", f"{unique_orders:,}", "kpi-bar-indigo", "Distinct customer orders")
     with c2:
-        kpi_card("Delivered Orders", f"{delivered_orders:,}", "kpi-bar-teal", "Successfully completed")
+        kpi_card("🏍️ Delivered Orders", f"{delivered_orders:,}", "kpi-bar-teal", "Successfully completed")
     with c3:
-        kpi_card("Total Revenue", f"€{total_revenue:,.2f}", "kpi-bar-slate", "Delivered-order revenue")
+        kpi_card("💰 Total Revenue", f"€{total_revenue:,.2f}", "kpi-bar-slate", "Delivered-order revenue")
     with c4:
-        kpi_card("Cancellation Rate", f"{cancel_rate:.1f}%", "kpi-bar-coral", "Windowed average")
+        kpi_card("❌ Cancellation Rate", f"{cancel_rate:.1f}%", "kpi-bar-coral", "Global cancellation share")
 
     st.markdown('<div class="section-title">System Activity</div>', unsafe_allow_html=True)
     st.markdown('<div class="section-sub">Technical flow counters complementary to the business KPIs</div>', unsafe_allow_html=True)
@@ -435,7 +442,7 @@ if page == "Overview":
     with s3:
         mini_kpi("Total Events", f"{total_events:,}")
     with s4:
-        mini_kpi("Active Zones", f"{active_zones:,}")
+        mini_kpi("🗺️Active Zones", f"{active_zones:,}")
 
     st.markdown('<div class="section-title">Business Snapshot</div>', unsafe_allow_html=True)
     st.markdown('<div class="section-sub">Current summary for the selected operational zones</div>', unsafe_allow_html=True)
@@ -452,9 +459,9 @@ if page == "Overview":
         st.metric("Delivery Success", f"{success_rate:.1f}%")
 
     st.markdown('<div class="section-title">Demand trend</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-sub">5-minute aggregation of unique orders across selected zones</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-sub">5-minute aggregation of distinct orders per selected zones</div>', unsafe_allow_html=True)
 
-    if not orders_view.empty and "window_start" in orders_view.columns:
+    if not orders_view.empty and "window_start" in orders_view.columns and "unique_orders" in orders_view.columns:
         series_df = (
             orders_view.groupby("window_start", as_index=False)["unique_orders"]
             .sum()
@@ -470,8 +477,8 @@ if page == "Overview":
                 line=dict(color="#5368df", width=3),
                 fill="tozeroy",
                 fillcolor="rgba(83,104,223,0.14)",
-                hovertemplate="%{x}<br>Unique orders: %{y}<extra></extra>",
-                name="Unique orders",
+                hovertemplate="%{x}<br>Distinct orders in bucket: %{y}<extra></extra>",
+                name="Distinct orders",
             )
         )
         fig.update_layout(
@@ -482,7 +489,7 @@ if page == "Overview":
             showlegend=False,
             hovermode="x unified",
             xaxis_title="Time",
-            yaxis_title="Unique orders",
+            yaxis_title="Distinct orders",
         )
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(gridcolor="rgba(23, 32, 42, 0.08)")
@@ -521,7 +528,7 @@ if page == "Overview":
 
     with right:
         st.markdown('<div class="soft-panel">', unsafe_allow_html=True)
-        st.markdown('<div class="small-card-title">Anomaly Watch</div>', unsafe_allow_html=True)
+        st.markdown('<div class="small-card-title">Avg. Delivery Time</div>', unsafe_allow_html=True)
         if not anomalies_view.empty:
             color_map = anomalies_view["anomaly_flag"].map({0: "#cbd5e1", 1: "#ef6f6c"}).fillna("#cbd5e1")
             fig_an = go.Figure()
@@ -571,7 +578,7 @@ elif page == "Operations":
         )
 
         fig_ops = go.Figure()
-        fig_ops.add_bar(x=zone_summary["zone_id"], y=zone_summary["unique_orders"], name="Unique orders", marker_color="#5368df")
+        fig_ops.add_bar(x=zone_summary["zone_id"], y=zone_summary["unique_orders"], name="Distinct orders", marker_color="#5368df")
         fig_ops.add_bar(x=zone_summary["zone_id"], y=zone_summary["delivered_orders"], name="Delivered", marker_color="#15b8a6")
         fig_ops.add_bar(x=zone_summary["zone_id"], y=zone_summary["cancelled_orders"], name="Cancelled", marker_color="#ef6f6c")
         fig_ops.update_layout(
