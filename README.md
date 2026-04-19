@@ -1,4 +1,4 @@
-# Urban Flow Monitor --- Real-Time Food Delivery Analytics
+# Urban Flow  --- Real-Time Food Delivery Analytics
 
 Group 7 · Spring 2026
 
@@ -106,7 +106,6 @@ sudo apt-get update
 sudo apt-get install -y openjdk-17-jdk-headless
 wget https://archive.apache.org/dist/spark/spark-4.0.1/spark-4.0.1-bin-hadoop3.tgz
 tar xf spark-4.0.1-bin-hadoop3.tgz
-source venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -149,7 +148,7 @@ Advanced: `notebooks/03_advanced_analytics.ipynb`
 ### 7. Run dashboard
 
 ``` bash
-streamlit run dashboard/app.py
+python -m streamlit run dashboard/app.py
 ```
 
 ------------------------------------------------------------------------
