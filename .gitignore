@@ -205,3 +205,23 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Local Spark install
+spark-4.0.1-bin-hadoop3/
+spark-4.0.1-bin-hadoop3.tgz
+
+# Local envs/checkpoints
+venv/
+.venv/
+data/checkpoints/
+.ipynb_checkpoints/
+
+# Local Spark install
+spark-4.0.1-bin-hadoop3/
+spark-4.0.1-bin-hadoop3.tgz
+
+# Local envs/checkpoints
+venv/
+.venv/
+data/checkpoints/
+.ipynb_checkpoints/
