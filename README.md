@@ -101,14 +101,13 @@ Data Generator → Event Hubs → Spark → Bronze → Silver → Gold → Dashb
 ### 1.1. Install dependencies
 
 ``` bash
-pip install -r requirements.txt
-```
-### 1.2. Install Spark
-
-``` bash
 cd /workspaces/Stream_Analytics-Group_7
+sudo apt-get update
+sudo apt-get install -y openjdk-17-jdk-headless
 wget https://archive.apache.org/dist/spark/spark-4.0.1/spark-4.0.1-bin-hadoop3.tgz
 tar xf spark-4.0.1-bin-hadoop3.tgz
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ### 2. Generate data
