@@ -102,3 +102,8 @@ webencodings==0.5.1
 websocket-client==1.9.0
 numpy
 faker
+streamlit
+plotly
+pyarrow
+pandas
+streamlit-autorefresh

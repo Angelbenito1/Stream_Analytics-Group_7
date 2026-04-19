@@ -225,3 +225,13 @@ venv/
 .venv/
 data/checkpoints/
 .ipynb_checkpoints/
+
+# Python env
+venv/
+.venv/
+
+# Spark checkpoints
+data/checkpoints/
+
+# Jupyter
+.ipynb_checkpoints/
