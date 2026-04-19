@@ -107,3 +107,4 @@ plotly
 pyarrow
 pandas
 streamlit-autorefresh
+findspark

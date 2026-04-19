@@ -98,10 +98,17 @@ Data Generator → Event Hubs → Spark → Bronze → Silver → Gold → Dashb
 
 ## How to Run the Pipeline
 
-### 1. Activate environment
+### 1.1. Install dependencies
 
 ``` bash
-source venv/bin/activate
+pip install -r requirements.txt
+```
+### 1.2. Install Spark
+
+``` bash
+cd /workspaces/Stream_Analytics-Group_7
+wget https://archive.apache.org/dist/spark/spark-4.0.1/spark-4.0.1-bin-hadoop3.tgz
+tar xf spark-4.0.1-bin-hadoop3.tgz
 ```
 
 ### 2. Generate data
